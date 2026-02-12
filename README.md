@@ -31,13 +31,12 @@ harperdb deploy \
 	username="<username>" \
 	password='<password>' \
 	project=nextjs-example \
-	package=HarperDB/nextjs-example \
 	skip_node_modules=false \
 	replicated=true \
 	restart=true
 ```
 
-Check out the included [build and deploy workflow](./.github/workflows/deploy.yml) for an example of how to automate this process.
+Check out the included [build and deploy workflow](./.github/workflows/build-and-deploy.yml) for an example of how to automate this process.
 
 ## How does it work?
 
