@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import('harperdb');
+import('harper');
 
 export async function listDogs() {
 	// Original database logic - uncomment when ready
