@@ -6,7 +6,7 @@
 	"scripts": {},
 	"dependencies": {
 		"@harperfast/nextjs": "2.0.0",
-		"harper": "5.0.3",
+		"harper": "^5.0.10",
 		"next": "15.5.15",
 		"react": "18",
 		"react-dom": "18"
