@@ -4,6 +4,11 @@
 	"private": true,
 	"license": "Apache-2.0",
 	"scripts": {
+		"dev": "harper-nextjs dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"format": "prettier --write .",
 		"test:integration": "harper-integration-test-run --isolation=none \"integrationTests/**/*.test.ts\""
 	},
 	"dependencies": {
