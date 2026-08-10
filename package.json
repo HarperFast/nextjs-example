@@ -1,32 +1,32 @@
 {
-	"name": "harper-nextjs-example",
-	"version": "0.1.0",
-	"private": true,
-	"license": "Apache-2.0",
-	"scripts": {
-		"dev": "harper-nextjs dev",
-		"build": "next build",
-		"start": "next start",
-		"lint": "next lint",
-		"format": "prettier --write .",
-		"test:integration": "harper-integration-test-run --isolation=none \"integrationTests/**/*.test.ts\""
-	},
-	"dependencies": {
-		"@harperfast/nextjs": "2.2.1",
-		"harper": "^5.0.10",
-		"next": "15.5.15",
-		"react": "18",
-		"react-dom": "18"
-	},
-	"devDependencies": {
-		"@harperdb/code-guidelines": "0.0.2",
-		"@harperfast/integration-testing": "^0.4.0",
-		"@types/node": "^22.0.0",
-		"eslint": "9.27.0",
-		"eslint-config-next": "15.3.3",
-		"eslint-config-prettier": "10.1.5",
-		"prettier": "3.5.3",
-		"typescript": "^5.6.0"
-	},
-	"prettier": "@harperdb/code-guidelines/prettier"
+  "name": "harper-nextjs-example",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "harper-nextjs dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "test:integration": "harper-integration-test-run --isolation=none \"integrationTests/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@harperfast/nextjs": "2.2.1",
+    "harper": "^5.2.1",
+    "next": "15.5.15",
+    "react": "18",
+    "react-dom": "18"
+  },
+  "devDependencies": {
+    "@harperdb/code-guidelines": "0.0.2",
+    "@harperfast/integration-testing": "^0.4.0",
+    "@types/node": "^22.0.0",
+    "eslint": "9.27.0",
+    "eslint-config-next": "15.3.3",
+    "eslint-config-prettier": "10.1.5",
+    "prettier": "3.5.3",
+    "typescript": "^5.6.0"
+  },
+  "prettier": "@harperdb/code-guidelines/prettier"
 }
