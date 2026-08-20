@@ -42,6 +42,12 @@ jobs:
   integration-tests:
     name: Integration Tests (Node ${{ matrix.node-version }})
     needs: [generate-node-version-matrix]
+    # ubuntu-latest is load-bearing, not just a default. The @harperfast/integration-testing
+    # harness binds each suite to its own loopback address (127.0.0.2, 127.0.0.3, ...), and
+    # Linux provides the whole 127.0.0.0/8 range out of the box. macOS and Windows runners do
+    # not: there the tests fail to bind (EADDRNOTAVAIL) until the aliases are created with
+    # `npx harper-integration-test-setup-loopback`, which needs sudo. Add that step first if
+    # this job is ever extended to another platform.
     runs-on: ubuntu-latest
 
     strategy:
