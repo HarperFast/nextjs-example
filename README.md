@@ -20,7 +20,7 @@ The easiest way to demonstrate this application remotely is to use the `prebuilt
 3. Then deploy the prebuilt application using the Harper CLI:
 
 ```bash
-harperdb deploy \
+harper deploy \
 	target="<operations api url>" \
 	username="<username>" \
 	password='<password>' \

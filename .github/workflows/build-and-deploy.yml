@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Install Harper CLI
-        run: npm install -g harperdb
+        run: npm install -g harper
 
       - name: Setup Harper
         env:
@@ -38,27 +38,27 @@ jobs:
           LOGGING_STDSTREAMS: true
           THREADS_COUNT: 1
           THREADS_DEBUG: false
-        run: harperdb install
+        run: harper install
 
       # - name: Deploy data
       #   run: |
-      #     harperdb start
+      #     harper start
       #     sleep 10
-      #     harperdb deploy project=basic-data package=HarperDB/basic-data-example replicated=true
+      #     harper deploy project=basic-data package=HarperFast/basic-data-example replicated=true
       #     sleep 10
-      #     harperdb stop
+      #     harper stop
 
       - name: Build project
         run: npm run build
 
       - name: Add prebuilt flag to config
-        run: yq e '.["@harperdb/nextjs"].prebuilt = true' -i config.yaml
+        run: yq e '.["@harperfast/nextjs"].prebuilt = true' -i config.yaml
 
-      - name: Upload HarperDB logs
+      - name: Upload Harper logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: harperdb-logs
+          name: harper-logs
           path: /tmp/hdb/log/hdb.log
           retention-days: 7
 
@@ -68,7 +68,7 @@ jobs:
           HDB_USERNAME: ${{ secrets.HDB_USERNAME }}
           HDB_PASSWORD: ${{ secrets.HDB_PASSWORD }}
         run: |
-          harperdb deploy \
+          harper deploy \
             target="$HDB_TARGET" \
             username="$HDB_USERNAME" \
             password="$HDB_PASSWORD" \
