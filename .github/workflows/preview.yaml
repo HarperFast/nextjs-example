@@ -51,16 +51,24 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ github.event.pull_request.head.sha }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
           REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
         run: |
           # preview-build.yaml starts on the same event as this run, so its run may not exist yet.
-          # Only a run whose head repository is this one counts: a fork's pull request can produce
-          # a run for the same commit, and its output must never be deployed. Of those, take the
-          # newest. A failed listing is retried, not read as "no build".
+          # Only a run of this branch whose head repository is this one counts: a fork's pull request
+          # can produce a run for the same commit, and its output must never be deployed. On a first
+          # attempt, a run from before this event (a reopened pull request's earlier build) does not
+          # count either. Of those, take the newest. A failed listing is retried, not read as "no build".
+          since=0
+          if [ "$RUN_ATTEMPT" = 1 ]; then
+            since=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '(.created_at | fromdateiso8601) - 120')
+          fi
           deadline=$((SECONDS + 30 * 60))
           while :; do
             if runs=$(gh api "repos/$REPO/actions/workflows/preview-build.yaml/runs?event=pull_request&head_sha=$SHA&per_page=20") &&
-              run=$(jq -c --arg repo "$REPO" '[.workflow_runs[] | select(.head_repository.full_name == $repo)] | sort_by([.run_number, .created_at]) | last // empty' <<<"$runs"); then
+              run=$(jq -c --arg repo "$REPO" --arg branch "$BRANCH" --argjson since "$since" '[.workflow_runs[] | select(.head_repository.full_name == $repo and .head_branch == $branch and (.created_at | fromdateiso8601) >= $since)] | sort_by([.run_number, .created_at]) | last // empty' <<<"$runs"); then
               if [ -z "$run" ]; then
                 echo "No preview build for $SHA yet"
               else

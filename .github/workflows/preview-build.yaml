@@ -26,8 +26,9 @@ concurrency:
 jobs:
   build:
     # A fork's pull request gets no preview, so it needs no build. preview.yaml also ignores any run
-    # from a fork's head repository, so a fork's build could never be deployed.
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    # from a fork's head repository, so a fork's build could never be deployed. Nor does a repository
+    # that has not set up previews.
+    if: github.event.pull_request.head.repo.full_name == github.repository && vars.HARPER_PREVIEW_TARGET != ''
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
