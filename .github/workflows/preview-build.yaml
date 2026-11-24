@@ -1,0 +1,64 @@
+# Builds each pull request for its preview. This is the unprivileged half of a pair: preview.yaml
+# deploys what this workflow uploads.
+#
+# Why two workflows: building runs the pull request's code, and its dependencies' install and build
+# scripts, so it must not happen in a job that can request the cluster's OIDC identity token. This
+# workflow runs on `pull_request`, with a read-only token and no `id-token` permission, so whatever
+# the build does, it never holds the preview identity. preview.yaml holds that identity, and only
+# downloads this build and deploys it.
+#
+# Why upload a build at all: building Next.js on a Harper cluster currently fails, so config.yaml
+# sets `prebuilt: true` (HarperFast/nextjs#57, HarperFast/nextjs#58), and a preview deployed by
+# reference has the cluster fetch the commit, which ships no `.next`.
+name: Preview build
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+# A new push to the pull request replaces a build still running for the older commit.
+concurrency:
+  group: preview-build-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # A fork's pull request gets no preview, so it needs no build. preview.yaml also ignores any run
+    # from a fork's head repository, so a fork's build could never be deployed.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Build the pull request's head commit, which is what the preview is recorded as, rather
+          # than the merge commit `pull_request` checks out by default.
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      # npm ships with Node.js, so it needs no setup step.
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Hand the app to preview.yaml
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          # preview.yaml downloads this by name from this run, and deploys it as the app directory.
+          name: preview-app
+          # The whole app directory, `.next` included. The cluster installs the dependencies itself,
+          # `.next/cache` is the build's own cache, and `.git` is not part of the app.
+          path: |
+            .
+            !.git/
+            !node_modules/
+            !.next/cache/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
