@@ -1,0 +1,133 @@
+# Deploys each pull request as a preview on your Harper cluster, and drops the preview when the pull
+# request closes. This is the privileged half of a pair with preview-build.yaml.
+#
+# Why two workflows: building runs the pull request's code, and its dependencies' install and build
+# scripts, so it must not happen in a job that can request the cluster's OIDC identity token.
+# preview-build.yaml builds on `pull_request`, where no job can request that token. This workflow
+# runs on `pull_request_target`, which GitHub always runs from this file as it is on the default
+# branch, so a pull request can't change what runs here. Its jobs can request the token, so they
+# never check out the pull request or run anything from it: the deploy job waits for
+# preview-build.yaml's run for the pull request's head commit, downloads the app that run uploaded,
+# and hands that directory to HarperFast/deploy-action, which uploads it to the cluster.
+#
+# Why not let the cluster fetch the commit (a by-reference preview): the commit ships no `.next`,
+# and building Next.js on the cluster currently fails, which is why config.yaml sets
+# `prebuilt: true` (HarperFast/nextjs#57, HarperFast/nextjs#58).
+#
+# Set up once with `npm run deploy:setup-previews` (see "Pull request previews" in the README). It
+# checks this file and sets the HARPER_PREVIEW_TARGET repository variable; until then, nothing here
+# calls a cluster.
+name: Preview
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, closed]
+
+permissions: {}
+
+jobs:
+  deploy:
+    # A fork's pull request gets no preview: on `pull_request_target` it would run with this
+    # repository's identity. The job also waits for setup to set HARPER_PREVIEW_TARGET.
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository && vars.HARPER_PREVIEW_TARGET != ''
+    runs-on: ubuntu-latest
+    # The environment the preview trust policy pins. Add required reviewers to it to approve each
+    # deploy.
+    environment: preview
+    permissions:
+      contents: read
+      actions: read # list preview-build.yaml's runs and download another run's artifact
+      id-token: write # request the OIDC token the cluster's preview trust policy accepts
+      pull-requests: write # keep one comment on the pull request with the preview URL
+      deployments: write # record each preview as a GitHub Deployment
+    # One deploy per pull request at a time, so an older commit's deploy can't finish after a newer
+    # one and leave the older commit on the preview. A new push cancels the older run.
+    concurrency:
+      group: preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Wait for this commit's build
+        id: build
+        # Event fields reach the script only as environment variables, never interpolated into it.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          # preview-build.yaml starts on the same event as this run, so its run may not exist yet.
+          # Only a run whose head repository is this one counts: a fork's pull request can produce
+          # a run for the same commit, and its output must never be deployed. Of those, take the
+          # newest. A failed listing is retried, not read as "no build".
+          deadline=$((SECONDS + 30 * 60))
+          while :; do
+            if runs=$(gh api "repos/$REPO/actions/workflows/preview-build.yaml/runs?event=pull_request&head_sha=$SHA&per_page=20") &&
+              run=$(jq -c --arg repo "$REPO" '[.workflow_runs[] | select(.head_repository.full_name == $repo)] | sort_by([.run_number, .created_at]) | last // empty' <<<"$runs"); then
+              if [ -z "$run" ]; then
+                echo "No preview build for $SHA yet"
+              else
+                status=$(jq -r .status <<<"$run")
+                url=$(jq -r .html_url <<<"$run")
+                if [ "$status" = completed ]; then
+                  conclusion=$(jq -r .conclusion <<<"$run")
+                  if [ "$conclusion" != success ]; then
+                    echo "::error::The preview build for $SHA finished as $conclusion, so there is nothing to deploy: $url"
+                    exit 1
+                  fi
+                  echo "Deploying the build from $url"
+                  echo "run-id=$(jq -r .id <<<"$run")" >> "$GITHUB_OUTPUT"
+                  exit 0
+                fi
+                echo "The preview build for $SHA is $status: $url"
+              fi
+            else
+              echo "::warning::Could not list the preview builds for $SHA; retrying"
+            fi
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error::No finished preview build for $SHA after 30 minutes. Check the Preview build workflow's runs for this commit."
+              exit 1
+            fi
+            sleep 15
+          done
+      - name: Download the build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: preview-app
+          path: preview-app
+          run-id: ${{ steps.build.outputs.run-id }}
+          github-token: ${{ github.token }}
+      - name: Remove files that could steer the deploy
+        # Defense in depth: the pull request's build wrote this directory, and the next step runs the
+        # harper CLI in it. The CLI loads `.env` from where it runs, npm reads `.npmrc` from there,
+        # and `.git` is not part of the app. This removes files and runs nothing from the artifact.
+        run: rm -rf -- preview-app/.git preview-app/.env* preview-app/.npmrc
+      - name: Deploy the preview
+        uses: HarperFast/deploy-action@a4a8af4e47add946657310b546f9e483d44b5cc5 # v1.0.1
+        with:
+          target: ${{ vars.HARPER_PREVIEW_TARGET }}
+          app: nextjs-example
+          preview: true
+          # Upload the downloaded app, `.next` included, rather than having the cluster fetch the
+          # commit.
+          path: preview-app
+          by_ref: false
+
+  cleanup:
+    # Keep this condition to these two terms: `npm run deploy:setup-previews` reads it to confirm
+    # that this job runs whenever a pull request closes, which is what drops its preview before the
+    # cluster expires it. The step below waits for HARPER_PREVIEW_TARGET instead.
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    # A separate environment with no required reviewers, so dropping a closed pull request's preview
+    # never waits for an approval. Its trust policy can only drop previews.
+    environment: preview-cleanup
+    permissions:
+      id-token: write # request the OIDC token the cluster's cleanup trust policy accepts
+      pull-requests: write # update the preview comment on the pull request
+      deployments: write # mark the preview's GitHub Deployments inactive
+    steps:
+      - name: Drop the preview
+        if: vars.HARPER_PREVIEW_TARGET != ''
+        uses: HarperFast/deploy-action@a4a8af4e47add946657310b546f9e483d44b5cc5 # v1.0.1
+        with:
+          target: ${{ vars.HARPER_PREVIEW_TARGET }}
+          app: nextjs-example
+          preview: true
