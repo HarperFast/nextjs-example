@@ -26,16 +26,16 @@ Putting the data access in server actions lets server _and_ client components sh
 
 ## Scripts
 
-| Script                          | What it does                                                                                         |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `npm run dev`                   | Builds, then runs the app in Harper in development mode.                                             |
-| `npm start`                     | Builds, then runs the app in Harper.                                                                 |
-| `npm run build`                 | Runs `next build`.                                                                                   |
-| `npm run lint`                  | Runs ESLint.                                                                                         |
-| `npm run deploy`                | Builds, then deploys this directory to your cluster as the user you logged in with.                  |
-| `npm run deploy:setup-ci`       | One-time setup for [deploying from GitHub Actions](#deploying-from-github-actions).                  |
-| `npm run deploy:setup-previews` | One-time setup for [pull request previews](#pull-request-previews).                                  |
-| `npm run test:integration`      | Builds, then boots the app in a throwaway Harper and runs [`integrationTests/`](./integrationTests). |
+| Script                          | What it does                                                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `npm run dev`                   | Builds, then runs the app in Harper. Run it again after an edit: it serves the build, without hot reloading. |
+| `npm start`                     | Builds, then runs the app in Harper.                                                                         |
+| `npm run build`                 | Runs `next build`.                                                                                           |
+| `npm run lint`                  | Runs ESLint.                                                                                                 |
+| `npm run deploy`                | Builds, then deploys this directory to your cluster as the user you logged in with.                          |
+| `npm run deploy:setup-ci`       | One-time setup for [deploying from GitHub Actions](#deploying-from-github-actions).                          |
+| `npm run deploy:setup-previews` | One-time setup for [pull request previews](#pull-request-previews).                                          |
+| `npm run test:integration`      | Builds, then boots the app in a throwaway Harper and runs [`integrationTests/`](./integrationTests).         |
 
 ## Deploying From GitHub Actions
 

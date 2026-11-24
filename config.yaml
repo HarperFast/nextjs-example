@@ -13,8 +13,8 @@ graphqlSchema:
   files: 'schema.graphql'
 
 # Runs the Next.js app as a Harper component. The npm scripts run `next build` first, then this
-# component serves the prebuilt `.next` output (`prebuilt: true` below); `harper dev` builds once
-# and then serves with hot-module reloading. Server-side code (server actions and server components)
+# component serves the prebuilt `.next` output (`prebuilt: true` below), so after editing the app,
+# run the script again to rebuild. Server-side code (server actions and server components)
 # reads and writes Harper tables directly through the injected `tables` and `transaction` globals —
 # see app/actions.js. Because this plugin owns HTTP routing for the app, there is no `static` or
 # `rest` handler here.
