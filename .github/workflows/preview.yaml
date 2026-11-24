@@ -63,7 +63,11 @@ jobs:
           # count either. Of those, take the newest. A failed listing is retried, not read as "no build".
           since=0
           if [ "$RUN_ATTEMPT" = 1 ]; then
-            since=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '(.created_at | fromdateiso8601) - 120')
+            for attempt in 1 2 3 4 5; do
+              since=$(gh api "repos/$REPO/actions/runs/$RUN_ID" --jq '(.created_at | fromdateiso8601) - 120') && break
+              [ "$attempt" = 5 ] && { echo "::error::Could not read this run's start time"; exit 1; }
+              sleep 10
+            done
           fi
           deadline=$((SECONDS + 30 * 60))
           while :; do
