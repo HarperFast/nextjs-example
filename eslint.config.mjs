@@ -1,13 +1,19 @@
-import { FlatCompat } from '@eslint/eslintrc';
-
-const compat = new FlatCompat({
-	baseDirectory: import.meta.dirname,
-});
+import next from 'eslint-config-next';
 
 const eslintConfig = [
-	...compat.config({
-		extends: ['next/core-web-vitals', 'prettier'],
-	}),
+	...next,
+	{
+		// `tables` and `transaction` are globals injected by the Harper runtime for server-side code.
+		languageOptions: {
+			globals: {
+				tables: 'readonly',
+				transaction: 'readonly',
+			},
+		},
+	},
+	{
+		ignores: ['.next/', 'node_modules/'],
+	},
 ];
 
 export default eslintConfig;

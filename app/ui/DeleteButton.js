@@ -3,7 +3,6 @@
 import { deleteDog } from '../actions';
 
 export default function DeleteButton({ dogId }) {
-	'use client';
 	return (
 		<button
 			onClick={() => deleteDog(dogId)}
