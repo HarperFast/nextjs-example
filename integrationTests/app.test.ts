@@ -12,7 +12,9 @@
 // These tests boot the full component as a fixture under v5 and verify:
 //   1. the component boots and the `Dog` table is defined,
 //   2. create / read-by-id / delete on the `Dog` table (Operations API),
-//   3. the Next.js HTML routes ("/" and "/dogs") render.
+//   3. the Next.js HTML routes ("/" and "/dogs") render, and "/dogs" lists a dog
+//      inserted into the table, which its server action reads through the
+//      `tables` global Harper injects.
 
 import { suite, test, before, after } from 'node:test';
 import { strictEqual, ok, deepStrictEqual } from 'node:assert/strict';
@@ -113,5 +115,20 @@ void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
 		const res = await pageFetch(ctx, '/dogs');
 		strictEqual(res.status, 200);
 		ok((res.headers.get('content-type') ?? '').includes('text/html'), 'expected an HTML response');
+	});
+
+	void test('Next.js /dogs page lists a dog from the Dog table', async () => {
+		// listDogs() reads the table through the injected `tables` global, and returns no dogs,
+		// rather than failing, when that global is missing. So check that a dog put in the
+		// table shows up on the page.
+		await op(ctx, {
+			operation: 'insert',
+			database: 'data',
+			table: 'Dog',
+			records: [{ id: 'dog-2', name: 'Biscuit', breed: 'Beagle', age: 4, color: 'Tan' }],
+		});
+		const res = await pageFetch(ctx, '/dogs');
+		strictEqual(res.status, 200);
+		ok((await res.text()).includes('Biscuit'), 'expected /dogs to list the dog inserted into the Dog table');
 	});
 });
