@@ -1,4 +1,5 @@
-type Dog @table @export {
+# Visitors add these dogs to a public demo, so Harper deletes each one an hour after it was written.
+type Dog @table(expiration: 3600) @export {
 	id: ID @primaryKey
 	name: String
 	breed: String

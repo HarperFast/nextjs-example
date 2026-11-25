@@ -2,6 +2,7 @@
 
 /* global tables */
 import { revalidatePath } from 'next/cache';
+import { parseDogForm } from './dogInput';
 
 // Server actions run *inside* Harper, so they read and write tables directly through the injected
 // globals — no separate API and no network round-trip. Harper provides `tables` (and `transaction`),
@@ -34,25 +35,14 @@ export async function listDogs() {
 // Any server action a client can reach is a public endpoint. This example lets anyone add and delete
 // dogs; add your own authorization checks before shipping mutations that matter.
 export async function createDog(formData) {
-	const name = formData.get('name');
-	const breed = formData.get('breed');
-	const ageField = String(formData.get('age') ?? '');
-	const color = formData.get('color');
-
-	if (!name || !breed || !ageField || !color) {
-		throw new Error('All fields are required');
-	}
-	if (!/^\d{1,2}$/.test(ageField)) {
-		throw new Error('Age must be a whole number of years from 0 to 99');
-	}
-	const age = Number(ageField);
+	const dog = parseDogForm(formData);
 
 	const Dog = dogTable();
 	if (!Dog) {
 		throw new Error('Database not available');
 	}
 
-	await Dog.create({ name, breed, age, color });
+	await Dog.create(dog);
 
 	// Revalidate the dogs page to show updated data
 	revalidatePath('/dogs');
