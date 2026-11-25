@@ -2,7 +2,7 @@
 //
 // Architecture note: this component is served by the `@harperfast/nextjs` plugin,
 // which owns the public HTTP port and routes every request to the Next.js app.
-// The `Dog` table (schema.graphql: `type Dog @table(expiration: 3600) @export`) is therefore NOT
+// The `Dog` table (schema.graphql) is therefore NOT
 // reachable as a REST resource over HTTP here — the Next.js server actions
 // (app/actions.js) read and write it through Harper's in-process Resource API
 // (`tables.Dog`). To exercise the same data layer from a test, we drive the

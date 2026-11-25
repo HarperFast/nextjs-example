@@ -22,7 +22,7 @@ const ageRegExp = new RegExp(`^(?:${AGE})$`, 'v');
 export const RAW_LENGTH_LIMIT = 200;
 const TEXT_FIELD_ENTRIES = Object.entries(TEXT_FIELDS);
 
-/** A field's input pattern, which also bounds its length once tidied: a run of spaces counts as one. */
+// Bounds the length the server measures after tidying, where a run of spaces counts as one.
 export function wordsInputPattern(field) {
 	return `(?=\\s*(?:\\S|\\s+(?=\\S)){1,${TEXT_FIELDS[field].maxLength}}\\s*$)${WORDS_INPUT}`;
 }
@@ -39,7 +39,8 @@ export function parseDogForm(formData) {
 		if (value === '') {
 			throw new Error('All fields are required');
 		}
-		if (value === null || value.length > maxLength || !wordsRegExp.test(value)) {
+		// Code points, as the input pattern counts them.
+		if (value === null || [...value].length > maxLength || !wordsRegExp.test(value)) {
 			throw new Error(`${label} must be words made of letters, up to ${maxLength} characters, with no links`);
 		}
 		dog[field] = value;
