@@ -22,7 +22,7 @@ const ageRegExp = new RegExp(`^(?:${AGE})$`, 'v');
 export const RAW_LENGTH_LIMIT = 200;
 const TEXT_FIELD_ENTRIES = Object.entries(TEXT_FIELDS);
 
-// Bounds the length the server measures: code points as typed, where a run of spaces counts as one.
+// A run of spaces counts as one, as the server's tidying makes it.
 export function wordsInputPattern(field) {
 	return `(?=\\s*(?:\\S|\\s+(?=\\S)){1,${TEXT_FIELDS[field].maxLength}}\\s*$)${WORDS_INPUT}`;
 }
