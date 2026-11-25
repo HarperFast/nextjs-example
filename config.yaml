@@ -2,7 +2,7 @@
 
 # This is the configuration file for the application.
 # It specifies built-in Harper components that will load the specified feature and files.
-# For more information, see https://docs.harperdb.io/docs/reference/components/built-in-extensions
+# For more information, see https://docs.harper.fast/reference/v5/components/overview#built-in-extensions-reference
 
 # Load Environment Variables from the specified file
 # loadEnv:

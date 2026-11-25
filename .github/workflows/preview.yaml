@@ -1,22 +1,7 @@
-# Deploys each pull request as a preview on your Harper cluster, and drops the preview when the pull
-# request closes. This is the privileged half of a pair with preview-build.yaml.
-#
-# Why two workflows: building runs the pull request's code, and its dependencies' install and build
-# scripts, so it must not happen in a job that can request the cluster's OIDC identity token.
-# preview-build.yaml builds on `pull_request`, where no job can request that token. This workflow
-# runs on `pull_request_target`, which GitHub always runs from this file as it is on the default
-# branch, so a pull request can't change what runs here. Its jobs can request the token, so they
-# never check out the pull request or run anything from it: the deploy job waits for
-# preview-build.yaml's run for the pull request's head commit, downloads the app that run uploaded,
-# and hands that directory to HarperFast/deploy-action, which uploads it to the cluster.
-#
-# Why not let the cluster fetch the commit (a by-reference preview): the commit ships no `.next`,
-# and building Next.js on the cluster currently fails, which is why config.yaml sets
-# `prebuilt: true` (HarperFast/nextjs#57, HarperFast/nextjs#58).
-#
-# Set up once with `npm run deploy:setup-previews` (see "Pull request previews" in the README). It
-# checks this file and sets the HARPER_PREVIEW_TARGET repository variable; until then, nothing here
-# calls a cluster.
+# The privileged half of the preview pair: deploys each pull request as a preview and drops it when
+# the pull request closes. Its jobs can request the cluster's identity token, so they never check out
+# or run the pull request's code; the deploy job deploys what preview-build.yaml built. See "Pull
+# Request Previews" in the README.
 name: Preview
 on:
   pull_request_target:
@@ -30,8 +15,7 @@ jobs:
     # repository's identity. The job also waits for setup to set HARPER_PREVIEW_TARGET.
     if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository && vars.HARPER_PREVIEW_TARGET != ''
     runs-on: ubuntu-latest
-    # The environment the preview trust policy pins. Add required reviewers to it to approve each
-    # deploy.
+    # The environment the preview trust policy pins.
     environment: preview
     permissions:
       contents: read

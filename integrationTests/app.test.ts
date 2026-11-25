@@ -14,7 +14,8 @@
 //   2. create / read-by-id / delete on the `Dog` table (Operations API),
 //   3. the Next.js HTML routes ("/" and "/dogs") render, and "/dogs" lists a dog
 //      inserted into the table, which its server action reads through the
-//      `tables` global Harper injects.
+//      `tables` global Harper injects,
+//   4. the add-dog form's server action accepts an age of 0 and refuses a negative one.
 
 import { suite, test, before, after } from 'node:test';
 import { strictEqual, ok, deepStrictEqual } from 'node:assert/strict';
@@ -51,6 +52,35 @@ async function op<T = unknown>(ctx: ContextWithHarper, operation: Record<string,
 
 function pageFetch(ctx: ContextWithHarper, path: string) {
 	return fetch(`${ctx.harper.httpURL}${path}`, { headers: { Authorization: authHeader(ctx) } });
+}
+
+// Posts the add-dog form as a browser without JavaScript does. Next.js renders the server action's id as a
+// hidden field of the form, and a plain form post that carries it runs createDog.
+async function submitDogForm(ctx: ContextWithHarper, fields: Record<string, string>) {
+	const page = await (await pageFetch(ctx, '/dogs')).text();
+	const actionField = /name="(\$ACTION_ID_[^"]+)"/.exec(page)?.[1];
+	ok(actionField, 'expected the add-dog form to carry its server action id');
+	const form = new FormData();
+	form.append(actionField, '');
+	for (const [name, value] of Object.entries(fields)) form.append(name, value);
+	return fetch(`${ctx.harper.httpURL}/dogs`, {
+		method: 'POST',
+		headers: { Authorization: authHeader(ctx) },
+		body: form,
+		redirect: 'manual',
+	});
+}
+
+async function dogsNamed(ctx: ContextWithHarper, name: string) {
+	const dogs = await op<{ name: string; age: number }[]>(ctx, {
+		operation: 'search_by_value',
+		database: 'data',
+		table: 'Dog',
+		search_attribute: 'id',
+		search_value: '*',
+		get_attributes: ['name', 'age'],
+	});
+	return dogs.filter((dog) => dog.name === name);
 }
 
 void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
@@ -130,5 +160,19 @@ void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
 		const res = await pageFetch(ctx, '/dogs');
 		strictEqual(res.status, 200);
 		ok((await res.text()).includes('Biscuit'), 'expected /dogs to list the dog inserted into the Dog table');
+	});
+
+	void test('the add-dog form accepts an age of 0', async () => {
+		const res = await submitDogForm(ctx, { name: 'Pip', breed: 'Corgi', age: '0', color: 'Red' });
+		ok(res.status < 400, `expected the form post to succeed, got HTTP ${res.status}`);
+		const dogs = await dogsNamed(ctx, 'Pip');
+		strictEqual(dogs.length, 1);
+		strictEqual(dogs[0].age, 0);
+	});
+
+	void test('the add-dog form refuses a negative age', async () => {
+		const res = await submitDogForm(ctx, { name: 'Minus', breed: 'Corgi', age: '-1', color: 'Red' });
+		ok(res.status >= 400, `expected the form post to fail, got HTTP ${res.status}`);
+		deepStrictEqual(await dogsNamed(ctx, 'Minus'), []);
 	});
 });
