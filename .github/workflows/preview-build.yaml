@@ -1,6 +1,5 @@
-# The unprivileged half of the preview pair: builds each pull request and uploads the app for
-# preview.yaml to deploy. It runs the pull request's code, so it gets a read-only token and no
-# `id-token` permission. See "Pull Request Previews" in the README.
+# The unprivileged half of the preview pair: it runs the pull request's code, so it gets a read-only
+# token and no `id-token` permission. See "Pull Request Previews" in the README.
 name: Preview build
 on:
   pull_request:

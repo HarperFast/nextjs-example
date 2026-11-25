@@ -42,8 +42,8 @@ export async function createDog(formData) {
 	if (!name || !breed || !ageField || !color) {
 		throw new Error('All fields are required');
 	}
-	if (!/^\d+$/.test(ageField) || !Number.isSafeInteger(Number(ageField))) {
-		throw new Error('Age must be a whole number of years, 0 or more');
+	if (!/^\d{1,2}$/.test(ageField)) {
+		throw new Error('Age must be a whole number of years from 0 to 99');
 	}
 	const age = Number(ageField);
 

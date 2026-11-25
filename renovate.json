@@ -16,10 +16,15 @@
 	},
 	"packageRules": [
 		{
-			"groupName": "pin digests",
-			"groupSlug": "all-digests",
+			"groupName": "GitHub Actions",
+			"groupSlug": "github-actions",
 			"matchDepTypes": ["action"],
 			"pinDigests": true
+		},
+		{
+			"description": "These actions run only after merge, in the jobs that can request the cluster's identity token (deploy.yaml's deploy job, and preview.yaml, which runs from main), so no pull request check exercises an update to them. Review each one instead of automerging it.",
+			"matchPackageNames": ["HarperFast/deploy-action", "actions/download-artifact"],
+			"automerge": false
 		},
 		{
 			"groupName": "all non-major dependencies",

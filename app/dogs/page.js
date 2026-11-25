@@ -116,7 +116,7 @@ export default async function Page() {
 						<input
 							type="text"
 							inputMode="numeric"
-							pattern="[0-9]+"
+							pattern="[0-9]{1,2}"
 							name="age"
 							style={{
 								width: '100%',

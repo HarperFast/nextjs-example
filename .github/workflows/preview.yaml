@@ -1,7 +1,5 @@
-# The privileged half of the preview pair: deploys each pull request as a preview and drops it when
-# the pull request closes. Its jobs can request the cluster's identity token, so they never check out
-# or run the pull request's code; the deploy job deploys what preview-build.yaml built. See "Pull
-# Request Previews" in the README.
+# The privileged half of the preview pair: its jobs can request the cluster's identity token, so they
+# never check out or run the pull request's code. See "Pull Request Previews" in the README.
 name: Preview
 on:
   pull_request_target:
