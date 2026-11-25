@@ -1,0 +1,36 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"description": "Automerges every update once all of its checks pass. Renovate merges it itself (platformAutomerge off) because main has no required checks, so GitHub's auto-merge would not wait for them. A merge to main deploys to production.",
+	"extends": ["config:recommended"],
+	"timezone": "America/New_York",
+	"schedule": ["before 9am on Monday"],
+	"semanticCommits": "enabled",
+	"prConcurrentLimit": 2,
+	"minimumReleaseAge": "3 days",
+	"internalChecksFilter": "strict",
+	"automerge": true,
+	"platformAutomerge": false,
+	"automergeStrategy": "rebase",
+	"lockFileMaintenance": {
+		"enabled": false
+	},
+	"packageRules": [
+		{
+			"groupName": "pin digests",
+			"groupSlug": "all-digests",
+			"matchDepTypes": ["action"],
+			"pinDigests": true
+		},
+		{
+			"groupName": "all non-major dependencies",
+			"groupSlug": "all-minor-patch",
+			"matchUpdateTypes": ["minor", "patch"],
+			"matchCurrentVersion": "!/^0/"
+		},
+		{
+			"description": "Hold eslint on v9: eslint-config-next (vendored Babel parser + eslint-plugin-react@7.37.5) isn't ESLint-10-ready, so `eslint .` crashes. Tracked at https://github.com/vercel/next.js/issues/91702; create-harper holds its Next.js templates the same way. Drop once eslint-config-next ships past it.",
+			"matchPackageNames": ["eslint"],
+			"allowedVersions": "<10"
+		}
+	]
+}
