@@ -168,12 +168,13 @@ void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
 		strictEqual(dogs[0].age, 0);
 	});
 
-	void test('the add-dog form refuses an age that is not a whole number of 0 or more', async () => {
+	void test('the add-dog form refuses an age that is not a whole number from 0 to 99', async () => {
 		for (const [name, age] of [
 			['Minus', '-1'],
 			['Blank', '   '],
 			['Half', '1.5'],
 			['Exponent', '1e1'],
+			['Hundred', '100'],
 		]) {
 			const res = await submitDogForm(ctx, { name, breed: 'Corgi', age, color: 'Red' });
 			ok(res.status >= 400, `expected age ${JSON.stringify(age)} to be refused, got HTTP ${res.status}`);

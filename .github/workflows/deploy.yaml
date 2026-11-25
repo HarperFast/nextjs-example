@@ -1,5 +1,4 @@
-# Lints and builds every pull request, and deploys to the Harper cluster when a change merges to
-# `main`, with no stored Harper credential. See "Deploying From GitHub Actions" in the README.
+# Deploys with no stored Harper credential: see "Deploying From GitHub Actions" in the README.
 name: Deploy to Harper
 on:
   pull_request:
