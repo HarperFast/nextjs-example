@@ -15,7 +15,7 @@
 //   3. the Next.js HTML routes ("/" and "/dogs") render, and "/dogs" lists a dog
 //      inserted into the table, which its server action reads through the
 //      `tables` global Harper injects,
-//   4. the add-dog form's server action accepts an age of 0 and refuses a negative one.
+//   4. the add-dog form's server action validates the age.
 
 import { suite, test, before, after } from 'node:test';
 import { strictEqual, ok, deepStrictEqual } from 'node:assert/strict';
@@ -54,8 +54,7 @@ function pageFetch(ctx: ContextWithHarper, path: string) {
 	return fetch(`${ctx.harper.httpURL}${path}`, { headers: { Authorization: authHeader(ctx) } });
 }
 
-// Posts the add-dog form as a browser without JavaScript does. Next.js renders the server action's id as a
-// hidden field of the form, and a plain form post that carries it runs createDog.
+// Next.js renders a server action's id as a hidden `$ACTION_ID_` field, so a plain form post runs createDog.
 async function submitDogForm(ctx: ContextWithHarper, fields: Record<string, string>) {
 	const page = await (await pageFetch(ctx, '/dogs')).text();
 	const actionField = /name="(\$ACTION_ID_[^"]+)"/.exec(page)?.[1];
@@ -170,9 +169,16 @@ void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
 		strictEqual(dogs[0].age, 0);
 	});
 
-	void test('the add-dog form refuses a negative age', async () => {
-		const res = await submitDogForm(ctx, { name: 'Minus', breed: 'Corgi', age: '-1', color: 'Red' });
-		ok(res.status >= 400, `expected the form post to fail, got HTTP ${res.status}`);
-		deepStrictEqual(await dogsNamed(ctx, 'Minus'), []);
+	void test('the add-dog form refuses an age that is not a whole number of 0 or more', async () => {
+		for (const [name, age] of [
+			['Minus', '-1'],
+			['Blank', '   '],
+			['Half', '1.5'],
+			['Exponent', '1e1'],
+		]) {
+			const res = await submitDogForm(ctx, { name, breed: 'Corgi', age, color: 'Red' });
+			ok(res.status >= 400, `expected age ${JSON.stringify(age)} to be refused, got HTTP ${res.status}`);
+			deepStrictEqual(await dogsNamed(ctx, name), []);
+		}
 	});
 });
