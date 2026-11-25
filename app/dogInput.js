@@ -10,7 +10,7 @@ const AGE = '[0-9]{1,2}';
 const WORDS_INPUT = `\\s*${WORD}(?:\\s+${WORD})*\\s*`;
 export const AGE_INPUT_PATTERN = `\\s*${AGE}\\s*`;
 
-export const TEXT_FIELDS = {
+const TEXT_FIELDS = {
 	name: { label: 'Name', maxLength: 40 },
 	breed: { label: 'Breed', maxLength: 60 },
 	color: { label: 'Color', maxLength: 40 },
