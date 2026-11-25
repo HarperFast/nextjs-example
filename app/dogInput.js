@@ -22,14 +22,14 @@ const ageRegExp = new RegExp(`^(?:${AGE})$`, 'v');
 export const RAW_LENGTH_LIMIT = 200;
 const TEXT_FIELD_ENTRIES = Object.entries(TEXT_FIELDS);
 
-// Bounds the length the server measures after tidying, where a run of spaces counts as one.
+// Bounds the length the server measures: code points as typed, where a run of spaces counts as one.
 export function wordsInputPattern(field) {
 	return `(?=\\s*(?:\\S|\\s+(?=\\S)){1,${TEXT_FIELDS[field].maxLength}}\\s*$)${WORDS_INPUT}`;
 }
 
 function tidy(formData, field) {
 	const raw = String(formData.get(field) ?? '');
-	return raw.length > RAW_LENGTH_LIMIT ? null : raw.normalize('NFC').trim().replace(/\s+/g, ' ');
+	return raw.length > RAW_LENGTH_LIMIT ? null : raw.trim().replace(/\s+/g, ' ');
 }
 
 export function parseDogForm(formData) {
@@ -39,11 +39,11 @@ export function parseDogForm(formData) {
 		if (value === '') {
 			throw new Error('All fields are required');
 		}
-		// Code points, as the input pattern counts them.
+		// Checked as typed, as the input pattern checks it: NFC can change the length either way.
 		if (value === null || [...value].length > maxLength || !wordsRegExp.test(value)) {
 			throw new Error(`${label} must be words made of letters, up to ${maxLength} characters, with no links`);
 		}
-		dog[field] = value;
+		dog[field] = value.normalize('NFC');
 	}
 	const age = tidy(formData, 'age');
 	if (age === '') {
