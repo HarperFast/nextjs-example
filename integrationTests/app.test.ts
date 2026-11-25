@@ -210,4 +210,17 @@ void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
 			deepStrictEqual(await dogsNamed(ctx, fields.name), []);
 		}
 	});
+
+	void test('the add-dog form measures a name as typed, as the input pattern does, and stores it in NFC', async () => {
+		// NFC turns each U+0958 into two code points and composes each e + U+0301 into one.
+		const lengthens = '\u0958'.repeat(21);
+		let res = await submitDogForm(ctx, { name: lengthens, breed: 'Corgi', age: '3', color: 'Red' });
+		ok(res.status < 400, `expected 21 typed letters to be accepted, got HTTP ${res.status}`);
+		strictEqual((await dogsNamed(ctx, lengthens.normalize('NFC'))).length, 1);
+
+		const shortens = 'e\u0301'.repeat(21);
+		res = await submitDogForm(ctx, { name: shortens, breed: 'Corgi', age: '3', color: 'Red' });
+		ok(res.status >= 400, `expected 42 typed code points to be refused, got HTTP ${res.status}`);
+		deepStrictEqual(await dogsNamed(ctx, shortens.normalize('NFC')), []);
+	});
 });
