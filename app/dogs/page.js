@@ -1,6 +1,6 @@
 import { listDogs, createDog } from '../actions';
 import DeleteButton from '../ui/DeleteButton';
-import { AGE_PATTERN, TEXT_FIELDS, WORDS_PATTERN } from '../dogInput';
+import { AGE_INPUT_PATTERN, TEXT_FIELDS, WORDS_INPUT_PATTERN } from '../dogInput';
 
 // Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic';
@@ -63,7 +63,7 @@ export default async function Page() {
 						<input
 							type="text"
 							name="name"
-							pattern={WORDS_PATTERN}
+							pattern={WORDS_INPUT_PATTERN}
 							maxLength={TEXT_FIELDS.name.maxLength}
 							title="Words made of letters, with no links"
 							style={{
@@ -93,7 +93,7 @@ export default async function Page() {
 						<input
 							type="text"
 							name="breed"
-							pattern={WORDS_PATTERN}
+							pattern={WORDS_INPUT_PATTERN}
 							maxLength={TEXT_FIELDS.breed.maxLength}
 							title="Words made of letters, with no links"
 							style={{
@@ -123,7 +123,7 @@ export default async function Page() {
 						<input
 							type="text"
 							inputMode="numeric"
-							pattern={AGE_PATTERN}
+							pattern={AGE_INPUT_PATTERN}
 							title="A whole number of years, 0 to 99"
 							name="age"
 							style={{
@@ -153,7 +153,7 @@ export default async function Page() {
 						<input
 							type="text"
 							name="color"
-							pattern={WORDS_PATTERN}
+							pattern={WORDS_INPUT_PATTERN}
 							maxLength={TEXT_FIELDS.color.maxLength}
 							title="Words made of letters, with no links"
 							style={{

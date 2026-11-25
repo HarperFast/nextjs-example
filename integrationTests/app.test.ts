@@ -2,7 +2,7 @@
 //
 // Architecture note: this component is served by the `@harperfast/nextjs` plugin,
 // which owns the public HTTP port and routes every request to the Next.js app.
-// The `Dog` table (schema.graphql: `type Dog @table @export`) is therefore NOT
+// The `Dog` table (schema.graphql: `type Dog @table(expiration: 3600) @export`) is therefore NOT
 // reachable as a REST resource over HTTP here — the Next.js server actions
 // (app/actions.js) read and write it through Harper's in-process Resource API
 // (`tables.Dog`). To exercise the same data layer from a test, we drive the
@@ -188,7 +188,7 @@ void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
 		const res = await submitDogForm(ctx, {
 			name: "  Zoë   O'Malley-Smith ",
 			breed: 'Jack Russell Terrier',
-			age: '2',
+			age: ' 2 ',
 			color: 'Brown, white',
 		});
 		ok(res.status < 400, `expected the form post to succeed, got HTTP ${res.status}`);
@@ -202,6 +202,7 @@ void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
 			['Linky', 'name', 'https://dogs.example'],
 			['Spammy', 'breed', 'Visit www.dogs.com'],
 			['Droid', 'color', 'R2D2'],
+			['Dashy', 'name', 'Rover-'],
 		]) {
 			const fields = { name, breed: 'Corgi', age: '3', color: 'Red', [field]: value };
 			const res = await submitDogForm(ctx, fields);
