@@ -1,6 +1,6 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"description": "Automerges every update once all of its checks pass. Renovate merges it itself (platformAutomerge off) because main has no required checks, so GitHub's auto-merge would not wait for them. A merge to main deploys to production. Security fixes from vulnerability alerts skip the schedule and the 3-day release age, as Renovate does by default.",
+	"description": "Automerges every npm update once all of its checks pass. Renovate merges it itself (platformAutomerge off) because main has no required checks, so GitHub's auto-merge would not wait for them. A merge to main deploys to production. Security fixes from vulnerability alerts skip the schedule and the 3-day release age, as Renovate does by default.",
 	"extends": ["config:recommended"],
 	"timezone": "America/New_York",
 	"schedule": ["before 9am on Monday"],
@@ -16,21 +16,19 @@
 	},
 	"packageRules": [
 		{
-			"groupName": "GitHub Actions",
-			"groupSlug": "github-actions",
-			"matchDepTypes": ["action"],
-			"pinDigests": true
-		},
-		{
-			"description": "These actions run only after merge, in the jobs that can request the cluster's identity token (deploy.yaml's deploy job, and preview.yaml, which runs from main), so no pull request check exercises an update to them. Review each one instead of automerging it.",
-			"matchPackageNames": ["HarperFast/deploy-action", "actions/download-artifact"],
-			"automerge": false
-		},
-		{
 			"groupName": "all non-major dependencies",
 			"groupSlug": "all-minor-patch",
+			"matchManagers": ["npm"],
 			"matchUpdateTypes": ["minor", "patch"],
 			"matchCurrentVersion": "!/^0/"
+		},
+		{
+			"description": "Review GitHub Actions updates rather than automerging them. The deploy job and preview.yaml run their actions with the cluster's identity token, and only after merge, so no pull request check exercises an update (a new release, or a tag moved to another commit) where it holds that token.",
+			"groupName": "GitHub Actions",
+			"groupSlug": "github-actions",
+			"matchManagers": ["github-actions"],
+			"pinDigests": true,
+			"automerge": false
 		},
 		{
 			"description": "Hold eslint on v9: eslint-config-next (vendored Babel parser + eslint-plugin-react@7.37.5) isn't ESLint-10-ready, so `eslint .` crashes. Tracked at https://github.com/vercel/next.js/issues/91702; create-harper holds its Next.js templates the same way. Drop once eslint-config-next ships past it.",
