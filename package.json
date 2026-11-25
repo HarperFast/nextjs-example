@@ -17,7 +17,7 @@
     "test:integration": "next build && harper-integration-test-run --isolation=none \"integrationTests/**/*.test.ts\""
   },
   "dependencies": {
-    "@harperfast/nextjs": "^2.5.1",
+    "@harperfast/nextjs": "^2.5.2",
     "next": "^16.2.11",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
