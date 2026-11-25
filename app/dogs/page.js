@@ -111,7 +111,7 @@ export default async function Page() {
 								color: '#374151',
 							}}
 						>
-							Age (in years)
+							Age (in years, 0–99)
 						</label>
 						<input
 							type="text"
