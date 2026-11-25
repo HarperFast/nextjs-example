@@ -53,7 +53,8 @@ function pageFetch(ctx: ContextWithHarper, path: string) {
 	return fetch(`${ctx.harper.httpURL}${path}`, { headers: { Authorization: authHeader(ctx) } });
 }
 
-// Next.js renders a server action's id as a hidden `$ACTION_ID_` field, so a plain form post runs createDog.
+// The form's action takes no bound arguments, so Next.js renders its id as a hidden `$ACTION_ID_` field, and
+// a plain form post runs createDog.
 async function submitDogForm(ctx: ContextWithHarper, fields: Record<string, string>) {
 	const page = await (await pageFetch(ctx, '/dogs')).text();
 	const actionField = /name="(\$ACTION_ID_[^"]+)"/.exec(page)?.[1];

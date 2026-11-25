@@ -28,10 +28,15 @@
 		},
 		{
 			"description": "Review GitHub Actions updates. The deploy job and preview.yaml run their actions with the cluster's identity token, and only after merge, so no pull request check exercises an update (a new release, or a tag moved to another commit) where it holds that token.",
+			"matchManagers": ["github-actions"],
+			"pinDigests": true
+		},
+		{
+			"description": "Non-major and digest updates of actions share one pull request; each major gets its own, so one migration does not hold up another.",
 			"groupName": "GitHub Actions",
 			"groupSlug": "github-actions",
 			"matchManagers": ["github-actions"],
-			"pinDigests": true
+			"matchUpdateTypes": ["minor", "patch", "digest", "pinDigest"]
 		},
 		{
 			"description": "Hold eslint on v9: eslint-config-next (vendored Babel parser + eslint-plugin-react@7.37.5) isn't ESLint-10-ready, so `eslint .` crashes. Tracked at https://github.com/vercel/next.js/issues/91702; create-harper holds its Next.js templates the same way. Drop once eslint-config-next ships past it.",
