@@ -92,12 +92,13 @@ void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
 	});
 
 	void test('component boots and the Dog table is defined', async () => {
-		const desc = await op<{ data: { Dog?: { name: string; primary_key: string } } }>(ctx, {
+		const desc = await op<{ data: { Dog?: { name: string; primary_key: string; expiration?: string } } }>(ctx, {
 			operation: 'describe_all',
 		});
 		ok(desc.data?.Dog, 'expected a Dog table in the "data" database');
 		strictEqual(desc.data.Dog.name, 'Dog');
 		strictEqual(desc.data.Dog.primary_key, 'id');
+		strictEqual(desc.data.Dog.expiration, '3600s', "visitors' dogs should expire after an hour");
 	});
 
 	void test('insert, read-by-id, and delete a Dog (Resource API via Operations API)', async () => {
@@ -180,6 +181,32 @@ void suite('Harper Next.js example', (ctx: ContextWithHarper) => {
 			const res = await submitDogForm(ctx, { name, breed: 'Corgi', age, color: 'Red' });
 			ok(res.status >= 400, `expected age ${JSON.stringify(age)} to be refused, got HTTP ${res.status}`);
 			deepStrictEqual(await dogsNamed(ctx, name), []);
+		}
+	});
+
+	void test('the add-dog form stores names, breeds and colors as tidied words', async () => {
+		const res = await submitDogForm(ctx, {
+			name: "  Zoë   O'Malley-Smith ",
+			breed: 'Jack Russell Terrier',
+			age: '2',
+			color: 'Brown, white',
+		});
+		ok(res.status < 400, `expected the form post to succeed, got HTTP ${res.status}`);
+		const dogs = await dogsNamed(ctx, "Zoë O'Malley-Smith");
+		strictEqual(dogs.length, 1);
+	});
+
+	void test('the add-dog form refuses links and other text that is not words', async () => {
+		for (const [name, field, value] of [
+			['Linky', 'name', 'example.com'],
+			['Linky', 'name', 'https://dogs.example'],
+			['Spammy', 'breed', 'Visit www.dogs.com'],
+			['Droid', 'color', 'R2D2'],
+		]) {
+			const fields = { name, breed: 'Corgi', age: '3', color: 'Red', [field]: value };
+			const res = await submitDogForm(ctx, fields);
+			ok(res.status >= 400, `expected ${field} ${JSON.stringify(value)} to be refused, got HTTP ${res.status}`);
+			deepStrictEqual(await dogsNamed(ctx, fields.name), []);
 		}
 	});
 });
