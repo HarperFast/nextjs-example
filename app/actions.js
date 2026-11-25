@@ -36,7 +36,7 @@ export async function listDogs() {
 export async function createDog(formData) {
 	const name = formData.get('name');
 	const breed = formData.get('breed');
-	const ageField = String(formData.get('age') ?? '').trim();
+	const ageField = String(formData.get('age') ?? '');
 	const color = formData.get('color');
 
 	if (!name || !breed || !ageField || !color) {
