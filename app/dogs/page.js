@@ -117,6 +117,7 @@ export default async function Page() {
 							type="text"
 							inputMode="numeric"
 							pattern="[0-9]{1,2}"
+							title="A whole number of years, 0 to 99"
 							name="age"
 							style={{
 								width: '100%',
