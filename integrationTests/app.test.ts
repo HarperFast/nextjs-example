@@ -14,8 +14,7 @@
 //   2. create / read-by-id / delete on the `Dog` table (Operations API),
 //   3. the Next.js HTML routes ("/" and "/dogs") render, and "/dogs" lists a dog
 //      inserted into the table, which its server action reads through the
-//      `tables` global Harper injects,
-//   4. the add-dog form's server action validates the age.
+//      `tables` global Harper injects.
 
 import { suite, test, before, after } from 'node:test';
 import { strictEqual, ok, deepStrictEqual } from 'node:assert/strict';

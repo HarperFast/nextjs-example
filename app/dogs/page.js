@@ -114,7 +114,9 @@ export default async function Page() {
 							Age (in years)
 						</label>
 						<input
-							type="number"
+							type="text"
+							inputMode="numeric"
+							pattern="[0-9]+"
 							name="age"
 							style={{
 								width: '100%',
@@ -125,7 +127,6 @@ export default async function Page() {
 								boxSizing: 'border-box',
 							}}
 							placeholder="3"
-							min="0"
 							required
 						/>
 					</div>
