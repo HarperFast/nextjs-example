@@ -36,17 +36,16 @@ export async function listDogs() {
 export async function createDog(formData) {
 	const name = formData.get('name');
 	const breed = formData.get('breed');
-	const ageField = formData.get('age');
+	const ageField = String(formData.get('age') ?? '').trim();
 	const color = formData.get('color');
 
 	if (!name || !breed || !ageField || !color) {
 		throw new Error('All fields are required');
 	}
-	// A puppy's age is 0, so test the number rather than its truthiness.
-	const age = Number(ageField);
-	if (!Number.isInteger(age) || age < 0) {
+	if (!/^\d+$/.test(ageField) || !Number.isSafeInteger(Number(ageField))) {
 		throw new Error('Age must be a whole number of years, 0 or more');
 	}
+	const age = Number(ageField);
 
 	const Dog = dogTable();
 	if (!Dog) {

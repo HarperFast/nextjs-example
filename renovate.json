@@ -1,6 +1,6 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"description": "Automerges every update once all of its checks pass. Renovate merges it itself (platformAutomerge off) because main has no required checks, so GitHub's auto-merge would not wait for them. A merge to main deploys to production.",
+	"description": "Automerges every update once all of its checks pass. Renovate merges it itself (platformAutomerge off) because main has no required checks, so GitHub's auto-merge would not wait for them. A merge to main deploys to production. Security fixes from vulnerability alerts skip the schedule and the 3-day release age, as Renovate does by default.",
 	"extends": ["config:recommended"],
 	"timezone": "America/New_York",
 	"schedule": ["before 9am on Monday"],
