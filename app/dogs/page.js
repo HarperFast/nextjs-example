@@ -1,6 +1,6 @@
 import { listDogs, createDog } from '../actions';
 import DeleteButton from '../ui/DeleteButton';
-import { AGE_INPUT_PATTERN, TEXT_FIELDS, WORDS_INPUT_PATTERN } from '../dogInput';
+import { AGE_INPUT_PATTERN, RAW_LENGTH_LIMIT, WORDS_INPUT_PATTERN } from '../dogInput';
 
 // Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic';
@@ -64,7 +64,7 @@ export default async function Page() {
 							type="text"
 							name="name"
 							pattern={WORDS_INPUT_PATTERN}
-							maxLength={TEXT_FIELDS.name.maxLength}
+							maxLength={RAW_LENGTH_LIMIT}
 							title="Words made of letters, with no links"
 							style={{
 								width: '100%',
@@ -94,7 +94,7 @@ export default async function Page() {
 							type="text"
 							name="breed"
 							pattern={WORDS_INPUT_PATTERN}
-							maxLength={TEXT_FIELDS.breed.maxLength}
+							maxLength={RAW_LENGTH_LIMIT}
 							title="Words made of letters, with no links"
 							style={{
 								width: '100%',
@@ -124,6 +124,7 @@ export default async function Page() {
 							type="text"
 							inputMode="numeric"
 							pattern={AGE_INPUT_PATTERN}
+							maxLength={RAW_LENGTH_LIMIT}
 							title="A whole number of years, 0 to 99"
 							name="age"
 							style={{
@@ -154,7 +155,7 @@ export default async function Page() {
 							type="text"
 							name="color"
 							pattern={WORDS_INPUT_PATTERN}
-							maxLength={TEXT_FIELDS.color.maxLength}
+							maxLength={RAW_LENGTH_LIMIT}
 							title="Words made of letters, with no links"
 							style={{
 								width: '100%',
