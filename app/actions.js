@@ -31,31 +31,21 @@ export async function listDogs() {
 	}
 }
 
-export async function getDog(id) {
-	try {
-		const Dog = dogTable();
-		if (!Dog) {
-			return null;
-		}
-		return await Dog.get(id);
-	} catch (error) {
-		console.error('Error getting dog:', error);
-		return null;
-	}
-}
-
 // Any server action a client can reach is a public endpoint. This example lets anyone add and delete
 // dogs; add your own authorization checks before shipping mutations that matter.
 export async function createDog(formData) {
-	// Extract form values
 	const name = formData.get('name');
 	const breed = formData.get('breed');
-	const age = parseInt(formData.get('age'));
+	const ageField = formData.get('age');
 	const color = formData.get('color');
 
-	// Validate required fields
-	if (!name || !breed || !age || !color) {
+	if (!name || !breed || !ageField || !color) {
 		throw new Error('All fields are required');
+	}
+	// A puppy's age is 0, so test the number rather than its truthiness.
+	const age = Number(ageField);
+	if (!Number.isInteger(age) || age < 0) {
+		throw new Error('Age must be a whole number of years, 0 or more');
 	}
 
 	const Dog = dogTable();

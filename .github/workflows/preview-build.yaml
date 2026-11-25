@@ -1,15 +1,6 @@
-# Builds each pull request for its preview. This is the unprivileged half of a pair: preview.yaml
-# deploys what this workflow uploads.
-#
-# Why two workflows: building runs the pull request's code, and its dependencies' install and build
-# scripts, so it must not happen in a job that can request the cluster's OIDC identity token. This
-# workflow runs on `pull_request`, with a read-only token and no `id-token` permission, so whatever
-# the build does, it never holds the preview identity. preview.yaml holds that identity, and only
-# downloads this build and deploys it.
-#
-# Why upload a build at all: building Next.js on a Harper cluster currently fails, so config.yaml
-# sets `prebuilt: true` (HarperFast/nextjs#57, HarperFast/nextjs#58), and a preview deployed by
-# reference has the cluster fetch the commit, which ships no `.next`.
+# The unprivileged half of the preview pair: builds each pull request and uploads the app for
+# preview.yaml to deploy. It runs the pull request's code, so it gets a read-only token and no
+# `id-token` permission. See "Pull Request Previews" in the README.
 name: Preview build
 on:
   pull_request:
@@ -38,7 +29,6 @@ jobs:
           # than the merge commit `pull_request` checks out by default.
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
-      # npm ships with Node.js, so it needs no setup step.
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:

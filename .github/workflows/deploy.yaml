@@ -1,9 +1,5 @@
-# Tests every pull request, and deploys to your Harper cluster when a change merges to `main`. The
-# deploy job holds no Harper credential: HarperFast/deploy-action authenticates with GitHub's OIDC
-# token under a trust policy on the cluster. Set that up once with `npm run deploy:setup-ci` (see
-# "Deploying from GitHub Actions" in the README). The test job runs `next build` and hands it to the
-# deploy job, which uploads it, because building on the cluster currently fails
-# (HarperFast/nextjs#57, HarperFast/nextjs#58). Pull request previews run from preview.yaml.
+# Lints and builds every pull request, and deploys to the Harper cluster when a change merges to
+# `main`, with no stored Harper credential. See "Deploying From GitHub Actions" in the README.
 name: Deploy to Harper
 on:
   pull_request:
@@ -28,7 +24,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # npm ships with Node.js, so it needs no setup step.
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
